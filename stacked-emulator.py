@@ -141,11 +141,21 @@ class Assembler(object):
         self.code = []
 
     
+    def __call__(self, dmem=None):
+        """
+        Get a machine running assembled code
+
+        can optionally pass the initial data memory state of the machine
+        """
+        dmem = dmem if dmem is not None else []
+        return StackedEmulator(self.assemble(), dmem)
+
+    
     def assemble(self):
-        #if len(self.code) > 0:
-        for instr in self.prog:
-            self.code.append(self.__encode(instr))
-        return self.code
+        if len(self.code) == 0:
+            for instr in self.prog:
+                self.code.append(self.__encode(instr))
+            return self.code
 
 
     def __encode(self, instr):
@@ -184,8 +194,7 @@ def main():
     """
 
     asm = Assembler(code)
-    code = asm.assemble()
-    cpu = StackedEmulator(code, [10])
+    cpu = asm([10])
     cpu.pc_prev = -1
     while (cpu.pc != cpu.pc_prev):
         cpu.pc_prev = cpu.pc
